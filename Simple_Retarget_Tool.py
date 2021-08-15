@@ -105,6 +105,48 @@ def retarget_root(context):
 
 
 
+
+    bpy.ops.pose.constraint_add_with_targets(type='TRANSFORM')
+    actposebone.constraints[-1].name = 'TranformLoc SMPTarget'
+    actposebone.constraints["TranformLoc SMPTarget"].target_space = 'LOCAL'
+    actposebone.constraints["TranformLoc SMPTarget"].owner_space = 'LOCAL'
+    actposebone.constraints["TranformLoc SMPTarget"].from_rotation_mode = 'AUTO'
+    actposebone.constraints["TranformLoc SMPTarget"].map_from = 'LOCATION'
+    actposebone.constraints["TranformLoc SMPTarget"].map_to = 'LOCATION'
+    actposebone.constraints["TranformLoc SMPTarget"].to_min_x = actposebone.location[0]
+    actposebone.constraints["TranformLoc SMPTarget"].to_min_y = actposebone.location[1]
+    actposebone.constraints["TranformLoc SMPTarget"].to_min_z = actposebone.location[2]
+    actposebone.constraints["TranformLoc SMPTarget"].mix_mode = 'ADD'
+    bpy.ops.constraint.move_up(constraint='TranformLoc SMPTarget', owner='BONE')
+    bpy.ops.constraint.move_up(constraint='TranformLoc SMPTarget', owner='BONE')
+
+    actposebone.rotation_mode = 'XYZ'
+    bpy.ops.pose.constraint_add_with_targets(type='TRANSFORM')
+    actposebone.constraints[-1].name = 'TranformRot SMPTarget'
+    actposebone.constraints["TranformRot SMPTarget"].target_space = 'LOCAL'
+    actposebone.constraints["TranformRot SMPTarget"].owner_space = 'LOCAL'
+    actposebone.constraints["TranformRot SMPTarget"].map_from = 'ROTATION'
+    actposebone.constraints["TranformRot SMPTarget"].from_rotation_mode = 'AUTO'
+    actposebone.constraints["TranformRot SMPTarget"].map_to = 'ROTATION'
+    actposebone.constraints["TranformRot SMPTarget"].to_euler_order = 'XYZ'
+    actposebone.constraints["TranformRot SMPTarget"].to_min_x_rot = actposebone.rotation_euler[0]
+    actposebone.constraints["TranformRot SMPTarget"].to_min_y_rot = actposebone.rotation_euler[1]
+    actposebone.constraints["TranformRot SMPTarget"].to_min_z_rot = actposebone.rotation_euler[2]
+    actposebone.constraints["TranformRot SMPTarget"].mix_mode_rot = 'BEFORE'
+    bpy.ops.constraint.move_up(constraint='TranformRot SMPTarget', owner='BONE')
+    bpy.ops.constraint.move_up(constraint='TranformRot SMPTarget', owner='BONE')
+    bpy.ops.constraint.move_up(constraint='TranformRot SMPTarget', owner='BONE')
+
+
+
+
+    actposebone.rotation_mode = 'QUATERNION'
+
+    bpy.ops.pose.rot_clear()
+    bpy.ops.pose.loc_clear()
+
+
+
 class RetargetRoot(bpy.types.Operator):
     """Retarget Root Bone"""
     bl_idname = "simpleretarget.retarget_root"
