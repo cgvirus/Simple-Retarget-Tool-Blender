@@ -145,6 +145,8 @@ class ClearConstrain(bpy.types.Operator):
 
         try:
             bpy.ops.pose.constraints_clear()
+            bpy.ops.pose.rot_clear()
+            bpy.ops.pose.loc_clear()
             return {'FINISHED'}
         except:
             return {'CANCELLED'}            
