@@ -24,7 +24,7 @@ bl_info = {
     "version": (1, 0),
     "blender": (2, 90, 3),
     "category": "Rigging",
-    "wiki_url": ""
+    "wiki_url": "https://github.com/cgvirus/Simple-Retarget-Tool-Blender"
     }
 
 from .Simple_Retarget_Tool import *
