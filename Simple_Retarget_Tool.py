@@ -188,6 +188,9 @@ class ClearConstrain(bpy.types.Operator):
         try:
             bpy.ops.constraint.delete(constraint="CopyLoc SMPTarget", owner='BONE')
             bpy.ops.constraint.delete(constraint="CopyRot SMPTarget", owner='BONE')
+            bpy.ops.constraint.delete(constraint="TranformRot SMPTarget", owner='BONE')
+            bpy.ops.constraint.delete(constraint="TranformLoc SMPTarget", owner='BONE')
+            
             bpy.ops.pose.rot_clear()
             bpy.ops.pose.loc_clear()
             return {'FINISHED'}
