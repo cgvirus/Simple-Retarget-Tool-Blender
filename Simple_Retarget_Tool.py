@@ -146,9 +146,32 @@ def retarget_root(context):
     bpy.ops.pose.loc_clear()
 
 
+# Set Rest Pose with Object
+
+def set_rest_pose_object(context):
+    rig = bpy.context.active_object
+
+    for obj in bpy.data.objects:
+        if (obj.type == 'MESH' and
+            rig in [m.object for m in obj.modifiers if m.type == 'ARMATURE']
+            ):
+                
+                objectToSelect = bpy.data.objects[obj.name]
+                objectToSelect.select_set(True)    
+                bpy.context.view_layer.objects.active = objectToSelect
+                for mod in bpy.context.object.modifiers:
+                    if mod.type == 'ARMATURE':
+                        bpy.ops.object.modifier_copy(modifier=mod.name)
+                        bpy.ops.object.modifier_apply(modifier=mod.name)
+                        bpy.context.object.modifiers.active.name = mod.name
+                        bpy.ops.object.select_all(action='DESELECT')
+                        
+    bpy.context.view_layer.objects.active = rig
+    bpy.ops.pose.armature_apply(selected=False)
+
 
 class RetargetRoot(bpy.types.Operator):
-    """Retarget Root Bone"""
+    """Retarget root bone"""
     bl_idname = "simpleretarget.retarget_root"
     bl_label = "Retarget Root"
 
@@ -163,7 +186,7 @@ class RetargetRoot(bpy.types.Operator):
 
 
 class RetargetBones(bpy.types.Operator):
-    """Retarget Muscle Bone"""
+    """Retarget muscle bone"""
     bl_idname = "simpleretarget.retarget_bone"
     bl_label = "Retarget Bone"
 
@@ -175,6 +198,21 @@ class RetargetBones(bpy.types.Operator):
             return {'FINISHED'}
         except:
             return {'CANCELLED'}
+
+class SetRestPoseObject(bpy.types.Operator):
+    """Set current pose as rest pose (with object pose)"""
+    bl_idname = "simpleretarget.set_rest_pose_with_object"
+    bl_label = "Set Rest Pose with Object"
+
+
+    def execute(self, context):
+
+        try:
+            set_rest_pose_object(context)
+            return {'FINISHED'}
+        except:
+            return {'CANCELLED'}
+
 
 
 class ClearConstrain(bpy.types.Operator):
@@ -205,7 +243,7 @@ class ClearConstrain(bpy.types.Operator):
 
 #UI
 
-class SimpleRetarget(Menu):
+class SimpleRetargetUI(Menu):
     bl_label = "Simple Retarget"
     bl_idname = "VIEW3D_MT_simpleretarget"
 
@@ -214,6 +252,7 @@ class SimpleRetarget(Menu):
     def draw(self, context):
         layout = self.layout
 
+        layout.operator("simpleretarget.set_rest_pose_with_object", text="set rest pose with objects")
         layout.operator("simpleretarget.retarget_root", text="retarget root")
         layout.operator("simpleretarget.retarget_bone", text="retarget muscle bone")
         layout.operator("simpleretarget.clear_constraint", text="clear pose constraint")
@@ -222,14 +261,15 @@ class SimpleRetarget(Menu):
 
 def draw_item(self, context):
     layout = self.layout
-    layout.menu(SimpleRetarget.bl_idname)
+    layout.menu(SimpleRetargetUI.bl_idname)
 
 
 classes = (
     RetargetRoot,
     RetargetBones,
     ClearConstrain,
-    SimpleRetarget
+    SetRestPoseObject,
+    SimpleRetargetUI
 )
 
 
