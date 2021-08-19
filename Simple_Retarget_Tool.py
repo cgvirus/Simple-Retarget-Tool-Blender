@@ -170,6 +170,32 @@ def set_rest_pose_object(context):
     bpy.ops.pose.armature_apply(selected=False)
 
 
+
+def clear_constrain(context):
+
+    bones = bpy.context.selected_pose_bones
+
+    for bone in bones:
+
+        for a in bone.constraints:
+            if 'CopyLoc SMPTarget' in a.name:
+                bone.constraints.remove(a)
+
+        for b in bone.constraints:
+            if 'CopyRot SMPTarget' in b.name:
+                bone.constraints.remove(b)
+
+        for c in bone.constraints:
+            if 'TranformRot SMPTarget' in c.name:
+                bone.constraints.remove(c)
+
+        for d in bone.constraints:
+            if 'TranformLoc SMPTarget' in d.name:
+                bone.constraints.remove(d)     
+
+
+
+
 class RetargetRoot(bpy.types.Operator):
     """Retarget root bone"""
     bl_idname = "simpleretarget.retarget_root"
@@ -223,20 +249,8 @@ class ClearConstrain(bpy.types.Operator):
 
     def execute(self, context):
 
-        actposebone = bpy.context.active_pose_bone
-
         try:
-            if actposebone.constraints['CopyLoc SMPTarget'] != None:
-                bpy.ops.constraint.delete(constraint="CopyLoc SMPTarget", owner='BONE')
-            if actposebone.constraints['CopyRot SMPTarget'] != None:
-                bpy.ops.constraint.delete(constraint="CopyRot SMPTarget", owner='BONE')
-            if actposebone.constraints['TranformRot SMPTarget'] != None:
-                bpy.ops.constraint.delete(constraint="TranformRot SMPTarget", owner='BONE')
-            if actposebone.constraints['TranformLoc SMPTarget'] != None:
-                bpy.ops.constraint.delete(constraint="TranformLoc SMPTarget", owner='BONE')
-            
-            bpy.ops.pose.rot_clear()
-            bpy.ops.pose.loc_clear()
+            clear_constrain(context)
             return {'FINISHED'}
         except:
             return {'CANCELLED'}            
