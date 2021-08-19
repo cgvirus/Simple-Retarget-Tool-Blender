@@ -191,7 +191,10 @@ def clear_constrain(context):
 
         for d in bone.constraints:
             if 'TranformLoc SMPTarget' in d.name:
-                bone.constraints.remove(d)     
+                bone.constraints.remove(d)
+
+    bpy.ops.pose.rot_clear()
+    bpy.ops.pose.loc_clear()     
 
 
 
