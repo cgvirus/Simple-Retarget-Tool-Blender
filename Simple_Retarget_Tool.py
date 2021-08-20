@@ -420,8 +420,8 @@ class SimpleRetargetUI(Menu):
         layout.operator("simpleretarget.retarget_root", text="retarget root")
         layout.operator("simpleretarget.retarget_bone", text="retarget muscle bone")
         layout.operator("simpleretarget.clear_constraint", text="clear pose constraint")
-        layout.operator("simpleretarget.write_preset", text="write a preset")
-        layout.operator("simpleretarget.apply_preset", text="apply a preset")
+        layout.operator("simpleretarget.write_preset", text="export preset")
+        layout.operator("simpleretarget.apply_preset", text="import preset")
 
 
 
