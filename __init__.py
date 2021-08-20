@@ -21,7 +21,7 @@ bl_info = {
     "name": "Simple Retarget Tool",
     "description": "Simply retarget bone animation",
     "author": "Fahad Hasan Pathik CGVIRUS",
-    "version": (1, 0),
+    "version": (2, 0),
     "blender": (2, 90, 3),
     "category": "Rigging",
     "wiki_url": "https://github.com/cgvirus/Simple-Retarget-Tool-Blender"
