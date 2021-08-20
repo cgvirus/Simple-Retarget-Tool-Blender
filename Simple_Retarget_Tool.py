@@ -31,7 +31,11 @@ bl_info = {
 
 import bpy
 from bpy.types import Menu
-
+from pathlib import Path
+from bpy_extras.io_utils import ImportHelper, ExportHelper 
+from bpy.types import Operator, OperatorFileListElement
+from bpy.props import CollectionProperty, StringProperty
+import traceback
 
 #Create muscle Constraints
 
@@ -198,6 +202,102 @@ def clear_constrain(context):
 
 
 
+def writepreset(self,context,filepath):
+
+    allbones=[]
+    bones= bpy.context.object.pose.bones
+
+    i=0
+    for i in range (len(bones)):
+
+        if "TranformRot SMPTarget" in bones[i].constraints.keys():
+            sbone=bones[i].name
+            allbones.insert(0,sbone)
+            tbone = bones[i].constraints["TranformRot SMPTarget"].subtarget
+            allbones.insert(1,tbone)
+
+        elif "CopyLoc SMPTarget" in bones[i].constraints.keys():
+            sbone=bones[i].name
+            allbones.append(sbone)
+            tbone = bones[i].constraints["CopyLoc SMPTarget"].subtarget
+            allbones.append(tbone)
+
+        else:
+            pass
+
+
+
+
+    with open(filepath, 'w') as filehandle:
+        filehandle.writelines("This file is automatically created by Blender Simple Retarget Tool by CGVIRUS\n")
+        filehandle.writelines("https://github.com/cgvirus/Simple-Retarget-Tool-Blender\n")
+        filehandle.writelines("Bone Links are in pair below. EDIT WITH CAUTION IF NEEDED!\n\n")
+        
+        if allbones == []:
+            self.report({'ERROR'},"Nothing exported\
+                \nSelect a bone that is already retargeted")
+            return {'CANCELLED'} 
+        else:
+            for listitem in allbones:
+                filehandle.write('%s\n' % listitem)
+                self.report({'INFO'},"File exported")
+
+    filehandle.close()
+
+
+
+
+def readPresetApply(context,filepath):  
+
+
+    # Read from File
+    bones = []
+    SourceArmBones = []
+    TargetArmBones = []
+
+    # open file and read the content in a list
+    with open(filepath, 'r') as filehandle:
+        currentPlace = filehandle.readlines()[4:]
+        for line in currentPlace:
+            # remove linebreak which is the last character of the string
+            bonelists = line[:-1]
+
+            # add item to the list
+            bones.append(bonelists)
+
+    filehandle.close()
+
+    SourceArmBones = bones[::2]
+    TargetArmBones = bones[::-2]
+    TargetArmBones.reverse()
+
+
+    #Apply list op
+
+    SourceArm = bpy.context.active_object
+    TargetArm = [s for s in bpy.context.selected_objects if s != SourceArm]
+
+
+    bpy.ops.pose.select_all(action='DESELECT')
+    bpy.context.object.data.bones.active = None
+
+    i=0
+    for i in range (len(SourceArmBones)):
+
+        tboneToSelect =  TargetArm[0].pose.bones[TargetArmBones[i]].bone
+        tboneToSelect.select = True
+        sboneToSelect =  SourceArm.pose.bones[SourceArmBones[i]].bone
+        bpy.context.object.data.bones.active = sboneToSelect
+        sboneToSelect.select = True
+        if i !=0:
+            retarget_bone(context)
+        else:
+            retarget_root(context)
+
+        bpy.ops.pose.select_all(action='DESELECT')
+        bpy.context.object.data.bones.active = None
+        i += 1
+
 
 class RetargetRoot(bpy.types.Operator):
     """Retarget root bone"""
@@ -258,6 +358,53 @@ class ClearConstrain(bpy.types.Operator):
         except:
             return {'CANCELLED'}            
 
+
+
+class OT_WritePreset(Operator, ExportHelper): 
+    bl_idname = "simpleretarget.write_preset" 
+    bl_label = "Save a preset" 
+
+    filename_ext = '.txt'
+    
+    filter_glob: StringProperty(
+        default='*.txt',
+        options={'HIDDEN'}
+    )
+
+    directory : StringProperty(subtype='DIR_PATH')
+    
+    def execute(self, context): 
+                
+        writepreset(self,context,self.filepath)
+        return {'FINISHED'}
+
+
+class OT_ApplyPreset(Operator, ImportHelper): 
+    bl_idname = "simpleretarget.apply_preset" 
+    bl_label = "Select a preset to apply" 
+
+    filename_ext = '.txt'
+    
+    filter_glob: StringProperty(
+        default='*.txt',
+        options={'HIDDEN'}
+    )
+
+    directory : StringProperty(subtype='DIR_PATH')
+    
+    def execute(self, context): 
+                
+        message = 'BONE MISMATCH.\
+                \n1. Select the animated (target) bone first then slecet the bone needs to be retargeted\
+                \n2. See the preset is correct\
+                \n3. See the bone name is not changed\n'
+        try:
+            readPresetApply(context,self.filepath)
+            return {'FINISHED'}
+        except:
+            self.report({'ERROR'},(message+traceback.format_exc(limit=1)))
+            return {'CANCELLED'} 
+
 #UI
 
 class SimpleRetargetUI(Menu):
@@ -273,6 +420,11 @@ class SimpleRetargetUI(Menu):
         layout.operator("simpleretarget.retarget_root", text="retarget root")
         layout.operator("simpleretarget.retarget_bone", text="retarget muscle bone")
         layout.operator("simpleretarget.clear_constraint", text="clear pose constraint")
+        layout.operator("simpleretarget.write_preset", text="write a preset")
+        layout.operator("simpleretarget.apply_preset", text="apply a preset")
+
+
+
 
 
 
@@ -286,6 +438,8 @@ classes = (
     RetargetBones,
     ClearConstrain,
     SetRestPoseObject,
+    OT_WritePreset,
+    OT_ApplyPreset,
     SimpleRetargetUI
 )
 
