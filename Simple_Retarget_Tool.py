@@ -165,9 +165,10 @@ def set_rest_pose_object(context):
                 bpy.context.view_layer.objects.active = objectToSelect
                 for mod in bpy.context.object.modifiers:
                     if mod.type == 'ARMATURE':
-                        bpy.ops.object.modifier_copy(modifier=mod.name)
-                        bpy.ops.object.modifier_apply(modifier=mod.name)
-                        bpy.context.object.modifiers.active.name = mod.name
+                        mod_name = mod.name
+                        bpy.ops.object.modifier_copy(modifier=mod_name)
+                        bpy.ops.object.modifier_apply(modifier=mod_name)
+                        bpy.context.object.modifiers.active.name = mod_name
                         bpy.ops.object.select_all(action='DESELECT')
                         
     bpy.context.view_layer.objects.active = rig
