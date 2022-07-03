@@ -153,9 +153,24 @@ def retarget_root(context):
 # Set Rest Pose with Object
 
 def set_rest_pose_object(context):
+
+
+    def apply_armature():
+
+        for mod in bpy.context.object.modifiers:
+
+            if mod.type == 'ARMATURE':
+                bpy.ops.object.select_all(action='DESELECT')
+                mod_name = mod.name
+                bpy.ops.object.modifier_copy(modifier=mod_name)
+                bpy.ops.object.modifier_apply(modifier=mod_name)
+                bpy.context.object.modifiers.active.name = mod_name
+
+
     rig = bpy.context.active_object
 
     for obj in bpy.data.objects:
+
         if (obj.type == 'MESH' and
             rig in [m.object for m in obj.modifiers if m.type == 'ARMATURE']
             ):
@@ -163,16 +178,38 @@ def set_rest_pose_object(context):
                 objectToSelect = bpy.data.objects[obj.name]
                 objectToSelect.select_set(True)    
                 bpy.context.view_layer.objects.active = objectToSelect
-                for mod in bpy.context.object.modifiers:
-                    if mod.type == 'ARMATURE':
-                        mod_name = mod.name
-                        bpy.ops.object.modifier_copy(modifier=mod_name)
-                        bpy.ops.object.modifier_apply(modifier=mod_name)
-                        bpy.context.object.modifiers.active.name = mod_name
-                        bpy.ops.object.select_all(action='DESELECT')
+                sourceobj = objectToSelect
+                
+                if sourceobj.data.shape_keys is None:
+
+                    apply_armature()
+
+                else:
+
+                    bpy.ops.object.duplicate(linked=False)
+                    duplicateobj = bpy.context.view_layer.objects.active
+                    duplicateobj.name="dups"
+                    sourceobj.shape_key_clear()
+                    bpy.context.view_layer.objects.active = sourceobj
+                    
+                    
+                    apply_armature()
+                    
+                    duplicateobj.select_set(True)        
+                    
+                    for idx in range(1, len(duplicateobj.data.shape_keys.key_blocks)):
+                        duplicateobj.active_shape_key_index = idx
+                        print("Copying Shape Key - ", duplicateobj.active_shape_key.name)
+                        bpy.ops.object.shape_key_transfer()
+                    
+                    sourceobj.show_only_shape_key = False
+                    bpy.data.objects.remove(duplicateobj, do_unlink=True)
+                
+                
                         
     bpy.context.view_layer.objects.active = rig
     bpy.ops.pose.armature_apply(selected=False)
+    
 
 
 
@@ -339,6 +376,7 @@ class SetRestPoseObject(bpy.types.Operator):
 
         try:
             set_rest_pose_object(context)
+            self.report({'INFO'}, "Rest Pose Created")
             return {'FINISHED'}
         except:
             return {'CANCELLED'}
