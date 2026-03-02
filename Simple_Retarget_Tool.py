@@ -21,8 +21,8 @@ bl_info = {
     "name": "Simple Retarget Tool",
     "description": "Simply retarget bone animation",
     "author": "Fahad Hasan Pathik CGVIRUS",
-    "version": (3, 0),
-    "blender": (2, 90, 3),
+    "version": (4, 0),
+    "blender": (5, 00, 0),
     "category": "Rigging",
     "wiki_url": "https://github.com/cgvirus/Simple-Retarget-Tool-Blender"
     }
@@ -322,10 +322,10 @@ def readPresetApply(context,filepath):
     i=0
     for i in range (len(SourceArmBones)):
 
-        tboneToSelect =  TargetArm[0].pose.bones[TargetArmBones[i]].bone
+        tboneToSelect =  TargetArm[0].pose.bones[TargetArmBones[i]]
         tboneToSelect.select = True
-        sboneToSelect =  SourceArm.pose.bones[SourceArmBones[i]].bone
-        bpy.context.object.data.bones.active = sboneToSelect
+        sboneToSelect =  SourceArm.pose.bones[SourceArmBones[i]]
+        bpy.context.object.data.bones.active = sboneToSelect.bone
         sboneToSelect.select = True
         if i !=0:
             retarget_bone(context)
